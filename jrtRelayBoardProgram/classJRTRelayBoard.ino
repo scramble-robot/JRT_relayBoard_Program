@@ -60,7 +60,8 @@ classJRTRelayBoard::classJRTRelayBoard() {
 
   u64LastSendTime = millis();  /// 前回送信時間を現時刻で初期化
 
-  Serial.begin(115200, SERIAL_8N1, 16, 17);
+  Serial.begin(115200, SERIAL_8N1);
+  Serial2.begin(115200, SERIAL_8N1, 16, 17);
 }
 
 /**
@@ -119,10 +120,10 @@ bool classJRTRelayBoard::sendInputStatus(void) {
     //Serial.println(pCharCommandBuffer);
     //Serial.println(u32Len);
     // Serial2.write で、シリアライズされた文字列（長さlen）を送信
-    Serial.write(pCharCommandBuffer, u32Len);
+    Serial2.write(pCharCommandBuffer, u32Len);
 
     u64LastSendTime = millis();
-    /*
+    
     Serial.print("u8DigitalSignalPacket[0](D8~D1):");
     Serial.println(m_sStructControllerCommandData.u8DigitalSignalPacket[0], BIN);
     Serial.print("u8DigitalSignalPacket[1](D15~D9):");
@@ -137,7 +138,7 @@ bool classJRTRelayBoard::sendInputStatus(void) {
     Serial.println(m_sStructControllerCommandData.u8AnalogSignalPacket[3]);
     Serial.print("u8AnalogSignalPacket[4]:");
     Serial.println(m_sStructControllerCommandData.u8AnalogSignalPacket[4]);
-    */
+    
     LedFlashing();
     
     return true;
