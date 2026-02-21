@@ -60,7 +60,7 @@ classJRTRelayBoard::classJRTRelayBoard() {
 
   u64LastSendTime = millis();  /// 前回送信時間を現時刻で初期化
 
-  Serial.begin(115200, SERIAL_8N1);　// デバック用ログ出力用の通信端子
+  Serial.begin(115200, SERIAL_8N1); // デバック用ログ出力用の通信端子
   Serial2.begin(115200, SERIAL_8N1, 16, 17); // 送信モジュールとの通信用Serial
 }
 
