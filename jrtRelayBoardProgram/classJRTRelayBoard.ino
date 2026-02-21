@@ -65,8 +65,9 @@ classJRTRelayBoard::classJRTRelayBoard() {
 }
 
 /**
-     * @brief LEDチカチカ（Lチカ）を実行する
-     */
+ * @brief LEDチカチカ（Lチカ）を実行する
+ * @note Wi-Fiの機能がOFFの時にLEDが点滅するようになっている
+ */
 void classJRTRelayBoard::LedFlashing(void) {
   if (WiFi.mode(WIFI_OFF)) {
     digitalWrite(msc_u8LedPin, HIGH);  // LED ON (ピン2：HIGH出力)
