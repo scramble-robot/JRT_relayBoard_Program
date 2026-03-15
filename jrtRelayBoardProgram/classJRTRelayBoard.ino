@@ -9,10 +9,10 @@
 #include <WiFi.h>
 
 /**
-     * @brief JRTRelayBoardの唯一のインスタンスへの参照を取得する
-     * @return JRTRelayBoardクラスのインスタンスへの参照
-     * * NOTE: ポインタではなく参照を返し、静的ローカル変数で安全なシングルトンを実現
-     */
+ * @brief JRTRelayBoardの唯一のインスタンスへの参照を取得する
+ * @return JRTRelayBoardクラスのインスタンスへの参照
+ * NOTE: ポインタではなく参照を返す
+ */
 classJRTRelayBoard& classJRTRelayBoard::getInstance(void) {
   // 関数が最初に呼び出されたときに一度だけ初期化される
   // プログラム終了時に自動的に破棄されるため、メモリリークの心配がない
@@ -60,12 +60,14 @@ classJRTRelayBoard::classJRTRelayBoard() {
 
   u64LastSendTime = millis();  /// 前回送信時間を現時刻で初期化
 
-  Serial.begin(115200, SERIAL_8N1, 16, 17);
+  Serial.begin(115200, SERIAL_8N1); // デバック用ログ出力用の通信端子
+  Serial2.begin(115200, SERIAL_8N1, 16, 17); // 送信モジュールとの通信用Serial
 }
 
 /**
-     * @brief LEDチカチカ（Lチカ）を実行する
-     */
+ * @brief LEDチカチカ（Lチカ）を実行する
+ * @note Wi-Fiの機能がOFFの時にLEDが点滅するようになっている
+ */
 void classJRTRelayBoard::LedFlashing(void) {
   if (WiFi.mode(WIFI_OFF)) {
     digitalWrite(msc_u8LedPin, HIGH);  // LED ON (ピン2：HIGH出力)
@@ -75,9 +77,9 @@ void classJRTRelayBoard::LedFlashing(void) {
 }
 
 /**
-     * @brief ディジタル入力端子の状態を取得するための関数
-     * @return 処理結果(成功:true,失敗:false)
-     */
+　* @brief ディジタル入力端子の状態を取得するための関数
+  * @return 処理結果(成功:true,失敗:false)
+  */
 void classJRTRelayBoard::digitalInputGetStatus(void) {
   m_sStructControllerCommandData.u8DigitalSignalPacket[0] = !digitalRead(msc_u8DigitalInput1) + !digitalRead(msc_u8DigitalInput2) * 2 + !digitalRead(msc_u8DigitalInput3) * 4 + !digitalRead(msc_u8DigitalInput4) * 8 + !digitalRead(msc_u8DigitalInput5) * 16 + !digitalRead(msc_u8DigitalInput6) * 32 + !digitalRead(msc_u8DigitalInput7) * 64 + !digitalRead(msc_u8DigitalInput8) * 128;
 
@@ -85,9 +87,9 @@ void classJRTRelayBoard::digitalInputGetStatus(void) {
 }
 
 /**
-     * @brief アナログ入力端子の状態を取得するための関数
-     * @return 処理結果(成功:true,失敗:false)
-     */
+ * @brief アナログ入力端子の状態を取得するための関数
+ * @return 処理結果(成功:true,失敗:false)
+ */
 void classJRTRelayBoard::analogInputGetStatus(void) {
   m_sStructControllerCommandData.u8AnalogSignalPacket[0] = (uint8_t)((analogRead(msc_u8AnalogInput1) * 255 / 4095));
   m_sStructControllerCommandData.u8AnalogSignalPacket[1] = (uint8_t)((analogRead(msc_u8AnalogInput2) * 255 / 4095));
@@ -97,9 +99,9 @@ void classJRTRelayBoard::analogInputGetStatus(void) {
 }
 
 /**
-     * @brief 端子の状態を送信するための関数
-     * @return 処理結果(成功:true,失敗:false)
-     */
+ * @brief 端子の状態を送信するための関数
+ * @return 処理結果(成功:true,失敗:false)
+ */
 bool classJRTRelayBoard::sendInputStatus(void) {
   // 送信バッファを定義（7バイトのデータ * 2桁 + 区切り文字 + \r\n + NULL終端）
   // 30バイトあれば十分と想定
@@ -116,13 +118,12 @@ bool classJRTRelayBoard::sendInputStatus(void) {
       m_sStructControllerCommandData.u8AnalogSignalPacket[2],
       m_sStructControllerCommandData.u8AnalogSignalPacket[3],
       m_sStructControllerCommandData.u8AnalogSignalPacket[4]);
-    //Serial.println(pCharCommandBuffer);
-    //Serial.println(u32Len);
-    // Serial2.write で、シリアライズされた文字列（長さlen）を送信
-    Serial.write(pCharCommandBuffer, u32Len);
+    // Serial2.write で、シリアライズされた文字列を送信
+    Serial2.write(pCharCommandBuffer, u32Len);
 
     u64LastSendTime = millis();
-    /*
+
+    // デバック用ログ出力部
     Serial.print("u8DigitalSignalPacket[0](D8~D1):");
     Serial.println(m_sStructControllerCommandData.u8DigitalSignalPacket[0], BIN);
     Serial.print("u8DigitalSignalPacket[1](D15~D9):");
@@ -137,7 +138,7 @@ bool classJRTRelayBoard::sendInputStatus(void) {
     Serial.println(m_sStructControllerCommandData.u8AnalogSignalPacket[3]);
     Serial.print("u8AnalogSignalPacket[4]:");
     Serial.println(m_sStructControllerCommandData.u8AnalogSignalPacket[4]);
-    */
+    
     LedFlashing();
     
     return true;

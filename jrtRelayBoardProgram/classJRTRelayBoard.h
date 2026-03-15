@@ -63,7 +63,7 @@ private:
   static const uint8_t msc_u8AnalogInput4 = 39;
   static const uint8_t msc_u8AnalogInput5 = 36;
 
-  static const unsigned long  msc_u64SendcycleTime = 300;
+  static const unsigned long  msc_u64SendcycleTime = 200;
 };
 
 #endif  // #ifndef JRTRELAYBOARDLIB_H_
